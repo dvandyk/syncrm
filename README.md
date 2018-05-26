@@ -2,9 +2,11 @@
 
 Python module and command line utilities to interact with the reMarkable tablet's cloud storage
 
+Heavily reliant on prior work by Andreas Gohr, see his API documentation over [here](https://github.com/splitbrain/ReMarkableAPI/wiki).
+
 ## Usage
 
-```rmt`` is supposed to mimick the git work flow. 
+```rmt``` is supposed to mimick the git work flow. 
 
 ### Initialization
 
