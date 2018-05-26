@@ -1,0 +1,8 @@
+# setuptools
+rmt.egg-info
+
+# VIM swap files
+*.swp
+
+# Python compiled files
+*.pyc
