@@ -41,7 +41,8 @@ def rmt_cli():
         nargs = '?',
         default = os.getcwd()
     )
-    parser_init.add_argument('ONE-TIME-CODE',
+    parser_init.add_argument('ONE_TIME_CODE',
+        metavar = 'ONE-TIME-CODE',
         type = str,
         help = 'one-time code obtained from https://my.remarkable.com'
     )
@@ -120,7 +121,7 @@ def init(args):
     client_id = str(uuid.uuid4())
 
     api = API()
-    api.register(args['ONE-TIME-CODE'], client_id)
+    api.register(args.ONE_TIME_CODE, client_id)
 
     with open(rmt_dir + '/client_id', 'w') as client_id_file:
         client_id_file.write(client_id)
