@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # vim: set sw=4 sts=4 et tw=120 :
 
+import logging as log
 import struct
 
 class LinesFile:
@@ -18,7 +19,9 @@ class LinesFile:
         }
 
 
-    def to_svg(self, output, colored = False):
+    def to_svg(self, output_base, colored = True):
+        result = []
+
         # Read the file in memory. Consider optimising by reading chunks.
         with open(self.input_file, 'rb') as f:
             data = f.read()
@@ -34,27 +37,18 @@ class LinesFile:
         if header != expected_header or npages < 1:
             abort('Not a valid reMarkable file: <header={}><npages={}>'.format(header, npages))
 
-        output.write(
-            '<svg xmlns="http://www.w3.org/2000/svg" height="{}" width="{}">'.format(
-                self.y_width, self.x_width
-            )
-        ) # BEGIN Notebook
-        output.write('''
-            <script type="application/ecmascript"> <![CDATA[
-                var visiblePage = 'p0';
-                function goToPage(page) {
-                    document.getElementById(visiblePage).setAttribute('style', 'display: none');
-                    document.getElementById(page).setAttribute('style', 'display: inline');
-                    visiblePage = page;
-                }
-            ]]> </script>
-        ''')
-
         # Iterate through pages (there is at least one)
         for page in range(npages):
             # BEGIN page
-            # Opening page group, visible only for the first page.
-            output.write('<g id="p{}" style="display:{}">'.format(page, 'none' if page != 0 else 'inline'))
+            log.debug('producing page {} of {}'.format(page, npages))
+            output_file = '{0}.page{1:05d}.svg'.format(output_base, page)
+            result.append(output_file)
+            output = open(output_file, 'w')
+            output.write(
+                '<svg xmlns="http://www.w3.org/2000/svg" height="{}" width="{}">'.format(
+                    self.y_width, self.x_width
+                )
+            )
 
             fmt = '<BBH' # TODO might be 'I'
             nlayers, b_unk, h_unk = struct.unpack_from(fmt, data, offset); offset += struct.calcsize(fmt)
@@ -130,11 +124,7 @@ class LinesFile:
 
                     output.write('" />\n') # END stroke
 
-            # Overlay the page with a clickable rect to flip pages
-            output.write('<rect x="0" y="0" width="{}" height="{}" fill-opacity="0" onclick="goToPage(\'p{}\')" />'.format(
-                self.x_width, self.y_width, (page + 1) % npages)
-            )
-            output.write('</g>') # Closing page group
+            output.write('</svg>') # Closing page group
+            output.close()
 
-        output.write('</svg>') # END notebook
-        output.close()
+        return result

@@ -85,6 +85,7 @@ def checkout(args):
             repo.read_index()
 
             for item_id, item_full_name in _modified(repo_dir, repo):
+                log.debug('checking out {} -> {}'.format(item_id, item_full_name))
                 with zipfile.ZipFile(repo_dir + '/.syncrm/blobs/' + item_id) as item_zip:
                     item_files = []
                     item_haslines = True
@@ -93,7 +94,7 @@ def checkout(args):
                     item_pdf = '{}.pdf'.format(item_id)
                     if item_pdf in item_zip.namelist():
                         item_files.append(item_pdf)
-                        item_hadpdf = True
+                        item_haspdf = True
 
                     item_lines = '{}.lines'.format(item_id)
                     if not item_lines in item_zip.namelist():
@@ -112,21 +113,28 @@ def checkout(args):
                     item_zip.extractall(path=item_tmpdir)
 
                     if item_haslines:
-                        # create .svg from .lines
+                        # create .svg page files from .lines file
+                        log.debug('creating .svg file from .lines file')
                         item_linesfile = LinesFile(item_tmpdir + item_lines)
-                        with open(item_tmpdir + item_lines + '.svg', 'w') as item_linesoutput:
-                            item_linesfile.to_svg(item_linesoutput)
-                        subprocess.call([
+                        item_linespages = item_linesfile.to_svg(item_tmpdir + item_lines)
+
+                        # convert all .svg page files to a single .pdf file
+                        call = [
                             'rsvg-convert',
                             '-a',
-                            '-f', 'pdf',
-                            item_tmpdir + item_lines + '.svg',
+                            '-f', 'pdf'
+                        ]
+                        call.extend(item_linespages)
+                        call.extend([
                             '-o', item_tmpdir + item_lines + '.pdf'
                         ])
+                        log.debug(str(call))
+                        subprocess.call(call)
 
                     os.makedirs(os.path.dirname(repo_dir + '/' + item_full_name), exist_ok = True)
 
-                    if item_haspdf:
+                    if item_haspdf and item_haslines:
+                        log.debug('combining original .pdf file and .annotated.pdf file')
                         subprocess.call([
                             'pdftk',
                             item_tmpdir + item_pdf,
@@ -139,9 +147,14 @@ def checkout(args):
                             item_tmpdir + '/' + item_id + '.annotated.pdf',
                             repo_dir + '/' + item_full_name + '.pdf'
                         )
-                    else:
+                    elif item_haslines: # lines only
                         shutil.move(
                             item_tmpdir + '/' + item_id + '.lines.pdf',
+                            repo_dir + '/' + item_full_name + '.pdf'
+                        )
+                    else: # pdf only
+                        shutil.move(
+                            item_tmpdir + '/' + item_id + '.pdf',
                             repo_dir + '/' + item_full_name + '.pdf'
                         )
 
