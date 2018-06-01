@@ -2,7 +2,10 @@
 
 Python module and command line utilities to interact with the reMarkable tablet's cloud storage
 
-Heavily reliant on prior work by Andreas Gohr, see his API documentation over [here](https://github.com/splitbrain/ReMarkableAPI/wiki).
+Heavily reliant on prior works:
+
+ - by Andreas Gohr (@splitbrain), see his API documentation over [here](https://github.com/splitbrain/ReMarkableAPI/wiki);
+ - by @edupont, see his rM2svg code over [here](https://github.com/reHackable/maxio/blob/master/tools/rM2svg).
 
 ## Usage
 
