@@ -59,10 +59,11 @@ def syncrm_cli():
     ## end of commands
 
     # add verbosity arg to all commands
-    for p in parser_checkout, parser_fetch, parser_init, parser_status:
-        p.add_argument("-v", "--verbose",
-        help="increase output verbosity",
-        action="store_true")
+    for p in parser, parser_checkout, parser_fetch, parser_init, parser_status:
+        p.add_argument('-v', '--verbose',
+            help = 'increase output verbosity',
+            action = 'store_true'
+        )
 
     args = parser.parse_args()
 
