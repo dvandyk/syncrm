@@ -4,10 +4,11 @@
 import argparse
 import logging as log
 import os
+import shutil
+import subprocess
 import sys
 import uuid
 import zipfile
-import shutil
 
 from syncrm import *
 
@@ -85,13 +86,64 @@ def checkout(args):
 
             for item_id, item_full_name in _modified(repo_dir, repo):
                 with zipfile.ZipFile(repo_dir + '/.syncrm/blobs/' + item_id) as item_zip:
+                    item_files = []
+                    item_haslines = True
+                    item_haspdf = False
+
                     item_pdf = '{}.pdf'.format(item_id)
-                    if not item_pdf in item_zip.namelist():
+                    if item_pdf in item_zip.namelist():
+                        item_files.append(item_pdf)
+                        item_hadpdf = True
+
+                    item_lines = '{}.lines'.format(item_id)
+                    if not item_lines in item_zip.namelist():
+                        item_haslines = False
+
+                    if not item_haslines and not item_haspdf:
+                        log.debug('skipping item {}, since it has neither a .pdf nor a .lines file'.format(item_id))
                         continue
 
-                    item_zip.extract(item_pdf, '/tmp/')
+                    # extract
+                    item_tmpdir = '/tmp/syncrm/' + item_id + '/'
+                    if os.path.exists(item_tmpdir):
+                        shutil.rmtree(item_tmpdir)
+
+                    os.makedirs(item_tmpdir)
+                    item_zip.extractall(path=item_tmpdir)
+
+                    if item_haslines:
+                        # create .svg from .lines
+                        item_linesfile = LinesFile(item_tmpdir + item_lines)
+                        with open(item_tmpdir + item_lines + '.svg', 'w') as item_linesoutput:
+                            item_linesfile.to_svg(item_linesoutput)
+                        subprocess.call([
+                            'rsvg-convert',
+                            '-a',
+                            '-f', 'pdf',
+                            item_tmpdir + item_lines + '.svg',
+                            '-o', item_tmpdir + item_lines + '.pdf'
+                        ])
+
                     os.makedirs(os.path.dirname(repo_dir + '/' + item_full_name), exist_ok = True)
-                    shutil.move('/tmp/' + item_pdf, repo_dir + '/' + item_full_name + '.pdf')
+
+                    if item_haspdf:
+                        subprocess.call([
+                            'pdftk',
+                            item_tmpdir + item_pdf,
+                            'multistamp',
+                            item_tmpdir + item_lines + '.pdf',
+                            'output',
+                            item_tmpdir + item_id + '.annotated.pdf'
+                        ])
+                        shutil.move(
+                            item_tmpdir + '/' + item_id + '.annotated.pdf',
+                            repo_dir + '/' + item_full_name + '.pdf'
+                        )
+                    else:
+                        shutil.move(
+                            item_tmpdir + '/' + item_id + '.lines.pdf',
+                            repo_dir + '/' + item_full_name + '.pdf'
+                        )
 
     except Exception as e:
         log.error(e, exc_info=args.verbose)
