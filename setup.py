@@ -3,25 +3,25 @@
 
 from setuptools import setup, find_packages
 
-with open('rmt/_version.py') as f:
+with open('syncrm/_version.py') as f:
     exec(f.read())
 
-setup(name='rmt',
+setup(name='syncrm',
     version=__version__,
     author='Danny van Dyk',
     author_email='danny.van.dyk@gmail.com',
-    url='https://github.com/dvandyk/rmt',
+    url='https://github.com/dvandyk/syncrm',
     description='Toolkit to synchronize with the reMarkable eInk tablet',
     license='LGPLv2',
     packages=find_packages(),
     package_data={
-        'rmt': [],
+        'syncrm': [],
     },
     install_requires=[ 'FileLock', 'py-dateutil' ],
     extras_require={
         'testing': [],
     },
     entry_points={
-        'console_scripts': [ 'rmt = rmt.cli:rmt_cli' ],
+        'console_scripts': [ 'syncrm = syncrm.cli:syncrm_cli' ],
     },
 )

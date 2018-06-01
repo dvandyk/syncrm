@@ -9,9 +9,9 @@ import uuid
 import zipfile
 import shutil
 
-from rmt import *
+from syncrm import *
 
-def rmt_cli():
+def syncrm_cli():
     parser = argparse.ArgumentParser(description="Command line interface to interact with your reMarkable tablet's cloud storage.")
     subparsers = parser.add_subparsers(title = 'commands')
 
@@ -38,7 +38,7 @@ def rmt_cli():
     )
     parser_init.add_argument('DIRECTORY',
         type = str,
-        help = 'directory to initialize as an rmt repository',
+        help = 'directory to initialize as a syncrm repository',
         nargs = '?',
         default = os.getcwd()
     )
@@ -83,7 +83,7 @@ def checkout(args):
             repo.read_index()
 
             for item_id, item_full_name in _modified(repo_dir, repo):
-                with zipfile.ZipFile(repo_dir + '/.rmt/blobs/' + item_id) as item_zip:
+                with zipfile.ZipFile(repo_dir + '/.syncrm/blobs/' + item_id) as item_zip:
                     item_pdf = '{}.pdf'.format(item_id)
                     if not item_pdf in item_zip.namelist():
                         continue
@@ -106,7 +106,7 @@ def fetch(args):
             index = api.list_items(with_blob = True)
             repo.write_index(index)
             for item_id, item in repo:
-                blob_path = repo_dir + '/.rmt/blobs/' + item_id
+                blob_path = repo_dir + '/.syncrm/blobs/' + item_id
                 if os.path.exists(blob_path):
                     local_mtime = os.path.getmtime(blob_path)
                     if (local_mtime >= item.mtime):
@@ -123,26 +123,26 @@ def fetch(args):
 
 
 def init(args):
-    rmt_dir = args.DIRECTORY + '/.rmt'
+    syncrm_dir = args.DIRECTORY + '/.syncrm'
 
-    if os.path.exists(rmt_dir):
-        log.error('Directory {} exists; remove and run rmt init again'.format(rmt_dir))
+    if os.path.exists(syncrm_dir):
+        log.error('Directory {} exists; remove and run syncrm init again'.format(syncrm_dir))
         sys.exit(-1)
 
-    os.makedirs(rmt_dir)
+    os.makedirs(syncrm_dir)
 
     client_id = str(uuid.uuid4())
 
     api = API()
     api.register(args.ONE_TIME_CODE, client_id)
 
-    with open(rmt_dir + '/client_id', 'w') as client_id_file:
+    with open(syncrm_dir + '/client_id', 'w') as client_id_file:
         client_id_file.write(client_id)
 
-    with open(rmt_dir + '/client_token', 'w') as client_token_file:
+    with open(syncrm_dir + '/client_token', 'w') as client_token_file:
         client_token_file.write(api.client_token)
 
-    os.makedirs(rmt_dir + '/blobs')
+    os.makedirs(syncrm_dir + '/blobs')
 
 
 def status(args):
@@ -179,7 +179,7 @@ def _modified(repo_dir, repo):
 
 def _lock_repo_dir():
     repo_dir = _find_repo_dir()
-    return (filelock.FileLock(_find_repo_dir() + '/.rmt/lock'), repo_dir)
+    return (filelock.FileLock(_find_repo_dir() + '/.syncrm/lock'), repo_dir)
 
 
 def _find_repo_dir():

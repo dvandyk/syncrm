@@ -40,10 +40,10 @@ class Repository:
     def __init__(self, repo_dir):
         self.repo_dir = repo_dir
 
-        with open(repo_dir + '/.rmt/client_id') as client_id_file:
+        with open(repo_dir + '/.syncrm/client_id') as client_id_file:
             self.client_id = client_id_file.read()
 
-        with open(repo_dir + '/.rmt/client_token') as client_token_file:
+        with open(repo_dir + '/.syncrm/client_token') as client_token_file:
             self.client_token = client_token_file.read()
 
         self.items = {}
@@ -58,7 +58,7 @@ class Repository:
 
 
     def read_index(self):
-        with open(self.repo_dir + '/.rmt/index', 'r') as index_file:
+        with open(self.repo_dir + '/.syncrm/index', 'r') as index_file:
             self.index = json.load(index_file)
             self.update()
 
@@ -66,7 +66,7 @@ class Repository:
     def write_index(self, index):
         self.index = index
         self.update()
-        with open(self.repo_dir + '/.rmt/index', 'w') as index_file:
+        with open(self.repo_dir + '/.syncrm/index', 'w') as index_file:
             index_file.write(json.dumps(index))
 
 
