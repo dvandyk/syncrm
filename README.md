@@ -6,6 +6,11 @@ Heavily reliant on prior works:
 
  - by Andreas Gohr (@splitbrain), see his API documentation over [here](https://github.com/splitbrain/ReMarkableAPI/wiki);
  - by @edupont, see his rM2svg code over [here](https://github.com/reHackable/maxio/blob/master/tools/rM2svg).
+ 
+ At the present ```syncrm``` depends on two command-line utilities:
+ 
+  - ```rsvg-convert```, which is installable in Ubuntu as ```librsvg2-bin```; and
+  - ```pdftk```, which is installable in Ubuntu 16.04 LTS as ```pdftk``` but is presently unavailable in 18.04 LTS.
 
 ## Usage
 
