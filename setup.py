@@ -17,7 +17,7 @@ setup(name='syncrm',
     package_data={
         'syncrm': [],
     },
-    install_requires=[ 'FileLock', 'py-dateutil' ],
+    install_requires=[ 'FileLock', 'python-dateutil' ],
     extras_require={
         'testing': [],
     },
