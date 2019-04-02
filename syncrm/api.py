@@ -79,3 +79,16 @@ class API:
             return json.loads(response.text)
 
         return None
+
+    def update_item(self, metadata):
+        update_url = self.storage_api + 'document-storage/json/2/upload/update-status'
+        update_headers = { 'Authorization': 'Bearer {}'.format(self.user_token) }
+        update_data = metadata
+
+        response = requests.put(url = update_url, headers = update_headers, params = update_params)
+
+        if response.status_code == requests.codes.ok:
+            return True
+
+        return False
+
