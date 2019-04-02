@@ -226,6 +226,33 @@ def status(args):
     except Exception as e:
         log.error(e, exc_info=args.verbose)
 
+def move(args):
+    try:
+        if not len(args) == 2:
+            raise RuntimeError('Expected two file names')
+
+        src_path = os.path.realpath(args[1])
+        dst_path = os.path.realpath(args[2])
+
+        if dst_path == src_path:
+            return
+
+        lock_file, repo_dir = _lock_repo_dir()
+        with lock_file:
+            repo = Repository(repo_dir)
+            repo.read_index()
+
+            src_dir = os.path.dirname(src_path)
+            dst_dir = os.path.dirname(dst_path)
+
+            # move within the same folder? -> rename
+            if dst_dir == src_dir:
+                api = API(repo.client_token)
+                src_uuid = repo.find_uuid(src_path)
+
+
+    except Exception as e:
+        log.error(e, exc_info=args.verbose)
 
 def _modified(repo_dir, repo):
     modified = []
