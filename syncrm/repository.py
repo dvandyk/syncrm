@@ -76,3 +76,13 @@ class Repository:
             self.items[item['ID']] = self.Item(self, **item)
             # TODO
             # - delete blobURL and other unused keys
+
+
+    def uuid_from_item(self, item_path):
+        for uuid, item in self.items.items():
+            if item.full_name() == item_path:
+                return uuid
+
+        return None
+
+

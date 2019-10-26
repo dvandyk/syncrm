@@ -85,7 +85,7 @@ class API:
         update_headers = { 'Authorization': 'Bearer {}'.format(self.user_token) }
         update_data = metadata
 
-        response = requests.put(url = update_url, headers = update_headers, params = update_params)
+        response = requests.put(url = update_url, headers = update_headers, params = update_data)
 
         if response.status_code == requests.codes.ok:
             return True

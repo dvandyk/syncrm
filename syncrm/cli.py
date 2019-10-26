@@ -57,6 +57,21 @@ def syncrm_cli():
     )
     parser_status.set_defaults(cmd = status)
 
+    # move
+    parser_move = subparsers.add_parser('mv',
+        description = 'Command line program to move or rename an item',
+        help = 'move or rename an item'
+    )
+    parser_move.add_argument('SOURCE',
+        type = str,
+        help = 'source item'
+    )
+    parser_move.add_argument('DESTINATION',
+        type = str,
+        help = 'destination item'
+    )
+    parser_move.set_defaults(cmd = move)
+
     ## end of commands
 
     # add verbosity arg to all commands
@@ -228,11 +243,8 @@ def status(args):
 
 def move(args):
     try:
-        if not len(args) == 2:
-            raise RuntimeError('Expected two file names')
-
-        src_path = os.path.realpath(args[1])
-        dst_path = os.path.realpath(args[2])
+        src_path = os.path.normpath(args.SOURCE)
+        dst_path = os.path.normpath(args.DESTINATION)
 
         if dst_path == src_path:
             return
@@ -245,10 +257,27 @@ def move(args):
             src_dir = os.path.dirname(src_path)
             dst_dir = os.path.dirname(dst_path)
 
-            # move within the same folder? -> rename
+            # move within the same folder?
+            # -> rename
             if dst_dir == src_dir:
                 api = API(repo.client_token)
-                src_uuid = repo.find_uuid(src_path)
+                api.discovery()
+                src_uuid = repo.uuid_from_item(src_path)
+
+                # new name
+                dst_name = os.path.basename(dst_path)
+
+                metadata = {
+                    'ID': src_uuid,
+                    'VissibleName': dst_name
+                }
+
+                r = api.update_item(metadata)
+                print(r)
+
+            # move across folders!
+            else:
+                raise Exception('moving across directories not yet implemented!')
 
 
     except Exception as e:
